@@ -8,7 +8,7 @@ const test = moment("2024-06-04", "YYYY-MM-DD").week()
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
-  })
+})
 
 console.log(test)
 
