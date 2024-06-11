@@ -33,8 +33,20 @@ app.post("/study", async (req, res) => {
     // Add in Date Filtering
     const result = await db.query("SELECT week_completed, SUM(study_unit) study_completed FROM study GROUP BY week_completed ORDER BY week_completed")  
     console.log(result.rows)
-    res.send(result.rows)
+    res.json(result.rows)
 }) 
+
+app.post("/study/subject", async (req, res) => {
+    const result = await db.query("SELECT subject, SUM(study_unit) study_completed FROM study GROUP BY subject ORDER BY subject")  
+    console.log(result.rows)
+    res.send(result.rows)
+})
+
+app.post("/study/type", async (req, res) => {
+    const result = await db.query("SELECT study_type, SUM(study_unit) study_completed FROM study GROUP BY study_type ORDER BY study_type")  
+    console.log(result.rows)
+    res.send(result.rows)
+})
 
 console.log(test)
 
