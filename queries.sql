@@ -9,8 +9,8 @@ CREATE TABLE study (
 );
 
 -- Test Data
-INSERT INTO study (week_completed, study_type, subject) 
-VALUES (23, 'Lecture', 'Maths');
+INSERT INTO study (completed, week_completed, study_type, subject) 
+VALUES ('2024-06-05', 23, 'Lecture', 'Maths');
 
 -- Group By Queries
 -- May need to add a where clause in here for additional filtering
@@ -32,6 +32,12 @@ SELECT subject, SUM(study_unit)
 FROM study
 GROUP BY subject
 ORDER BY subject;
+
+-- Group by study type and week
+SELECT study_type, week_completed, SUM(study_unit) study_completed 
+FROM study 
+GROUP BY study_type, week_completed 
+ORDER BY study_type
 
 -- Filtering by completed date
 -- Placeholder dates used here - we would get this from the user

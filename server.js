@@ -38,10 +38,11 @@ app.post("/study", async (req, res) => {
 
 app.post("/study/subject", async (req, res) => {
     // For stacked bar chart we want to group by the week completed as well
+    let result
     if (req.body.filterWeek) {
-        const result = await db.query("SELECT subject, week_completed, SUM(study_unit) study_completed FROM study GROUP BY subject, week_completed ORDER BY subject") 
+        result = await db.query("SELECT subject, week_completed, SUM(study_unit) study_completed FROM study GROUP BY subject, week_completed ORDER BY subject") 
     } else {
-        const result = await db.query("SELECT subject, SUM(study_unit) study_completed FROM study GROUP BY subject ORDER BY subject") 
+        result = await db.query("SELECT subject, SUM(study_unit) study_completed FROM study GROUP BY subject ORDER BY subject") 
     }
     console.log(result.rows)
     res.send(result.rows)
@@ -49,10 +50,11 @@ app.post("/study/subject", async (req, res) => {
 
 app.post("/study/type", async (req, res) => {
     // For stacked bar chart we want to group by the week completed as well
+    let result
     if (req.body.filterWeek) {
-        const result = await db.query("SELECT study_type, week_completed, SUM(study_unit) study_completed FROM study GROUP BY study_type, week_completed ORDER BY study_type")  
+        result = await db.query("SELECT study_type, week_completed, SUM(study_unit) study_completed FROM study GROUP BY study_type, week_completed ORDER BY study_type")
     } else {
-        const result = await db.query("SELECT study_type, SUM(study_unit) study_completed FROM study GROUP BY study_type ORDER BY study_type")  
+        result = await db.query("SELECT study_type, SUM(study_unit) study_completed FROM study GROUP BY study_type ORDER BY study_type")  
     }
     console.log(result.rows)
     res.send(result.rows)
