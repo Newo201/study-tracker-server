@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import pg from "pg"
 import moment from "moment"
 import env from "dotenv";
+import { start } from "repl";
 
 const port = 5000
 const app = express()
@@ -29,9 +30,12 @@ app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
-app.post("/study", async (req, res) => {
+app.get("/study", async (req, res) => {
     // Add in Date Filtering
-    const result = await db.query("SELECT week_completed, SUM(study_unit) study_completed FROM study GROUP BY week_completed ORDER BY week_completed")  
+    const {start_date, end_date} = req.query
+    console.log(req.query)
+    const result = await db.query("SELECT week_completed, SUM(study_unit) study_completed FROM study WHERE completed BETWEEN $1 AND $2 GROUP BY week_completed ORDER BY week_completed",
+    [start_date, end_date])  
     console.log(result.rows)
     res.json(result.rows)
 }) 
