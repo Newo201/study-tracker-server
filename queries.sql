@@ -1,16 +1,31 @@
 -- Creating initial table
 CREATE TABLE study (
     id SERIAL PRIMARY KEY,
-    completed DATE NOT NULL DEFAULT CURRENT_DATE,
-    week_completed INTEGER NOT NULL,
+    is_completed BOOLEAN DEFAULT FALSE
+    completed DATE,
+    week_completed INTEGER,
     study_type TEXT NOT NULL,
     subject TEXT NOT NULL,
     study_unit INTEGER NOT NULL DEFAULT 1
 );
 
+-- Creating ToDo Table
+-- CREATE TABLE todo (
+--     id SERIAL PRIMARY KEY,
+--     study_type TEXT NOT NULL,
+--     subject TEXT NOT NULL,
+--     task TEXT
+--     study_unit INTEGER NOT NULL DEFAULT 1,
+--     is_completed BOOLEAN DEFAULT FALSE
+-- )
+
 -- Test Data
 INSERT INTO study (completed, week_completed, study_type, subject) 
 VALUES ('2024-06-05', 23, 'Lecture', 'Maths');
+
+INSERT INTO study (subject, study_type, task)
+VALUES ('Maths', 'Lecture', 'Write Lecture Notes'), ('English', 'Assignment', 'Complete First Draft'), ('Science', 'Tutorials', 'Attempt Tutorial Prep Questions');
+
 
 -- Group By Queries
 -- May need to add a where clause in here for additional filtering
@@ -44,5 +59,7 @@ ORDER BY study_type
 -- If we want to filter by week numbers then we could first convert the dates to week numbers in JS
 -- before running the SQL query
 SELECT * FROM study
-WHERE completed BETWEEN '2024-05-01' AND '2024-06-01'
+WHERE completed >= current_date - 30
+LIMIT 6
 
+INSERT INTO study (subject, study_type, task)

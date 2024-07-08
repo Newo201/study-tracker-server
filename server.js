@@ -32,6 +32,7 @@ app.get('/', (req, res) => {
 
 app.get("/study", async (req, res) => {
     // Add in Date Filtering
+    console.log(req.query)
     const {start_date, end_date} = req.query
     const result = await db.query("SELECT week_completed, SUM(study_unit) study_completed FROM study WHERE completed BETWEEN $1 AND $2 GROUP BY week_completed ORDER BY week_completed",
     [start_date, end_date])  
