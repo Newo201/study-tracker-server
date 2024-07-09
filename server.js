@@ -74,6 +74,28 @@ app.get("/study/type", async (req, res) => {
     res.send(result.rows)
 })
 
+// Mark a ToDo as completed
+app.patch("/study/completed/:id", async (req, res) => {
+    // Find the current date
+    const currDate = new Date().toLocaleDateString().split('T')[0]
+    // Convert to week number
+    const weekNum = moment(currDate, "DD/MM/YYYY").week()
+    // Check if the task has already been completed
+
+    // Update the databse
+    const update = await db.query("UPDATE study SET is_completed = true, completed = $1, week_completed = $2 WHERE id = $3 RETURNING *", [currDate, weekNum, req.params.id])
+    res.send(update.rows[0])
+
+})
+
+// Duplicate the current todo
+app.post("/study/duplicate/:id", async (req, res) => {
+    const result = await db.query("SELECT study_type, subject, task FROM study WHERE id = ($1)", [req.params.id])
+    const currentToDo = result.rows[0]
+    const newToDo = await db.query("INSERT INTO study (subject, study_type, task) VALUES ($1, $2, $3) RETURNING *", [currentToDo.subject, currentToDo.study_type, currentToDo.task])
+    res.send(newToDo.rows[0])
+})
+
 app.listen(port, () => {
     console.log(`App is litening on port ${port}`)
 })
