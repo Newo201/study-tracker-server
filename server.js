@@ -74,6 +74,27 @@ app.get("/study/type", async (req, res) => {
     res.send(result.rows)
 })
 
+// Add a new ToDo to the list
+app.post("/study", async(req, res) => {
+    const {subject, study_type, task} = req.body
+    const newToDo = await db.query("INSERT INTO study (subject, study_type, task) VALUES ($1, $2, $3) RETURNING *", [subject, study_type, task])
+    res.send(newToDo.rows[0])
+})
+
+// Modify the contents of an uncompleted ToDo
+app.patch("/study/:id", async(req, res) => {
+    const {subject, study_type, task} = req.body
+    // Check if the task has already been completed
+    const getToDo = await db.query("SELECT is_completed FROM study WHERE id = $1", [req.params.id])
+    if (getToDo.rows[0].is_completed) {
+        // Update the database
+        const update = await db.query("UPDATE study SET subject = $1, study_type = $2, task = $3 WHERE id = $4 RETURNING *", [subject, study_type, task, req.params.id])
+        res.send(update.rows[0])
+    } else {
+        res.send("ToDo has already been marked as completed")
+    }
+})
+
 // Mark a ToDo as completed
 app.patch("/study/completed/:id", async (req, res) => {
     // Find the current date
@@ -81,11 +102,14 @@ app.patch("/study/completed/:id", async (req, res) => {
     // Convert to week number
     const weekNum = moment(currDate, "DD/MM/YYYY").week()
     // Check if the task has already been completed
-
-    // Update the databse
-    const update = await db.query("UPDATE study SET is_completed = true, completed = $1, week_completed = $2 WHERE id = $3 RETURNING *", [currDate, weekNum, req.params.id])
-    res.send(update.rows[0])
-
+    const getToDo = await db.query("SELECT is_completed FROM study WHERE id = $1", [req.params.id])
+    if (getToDo.rows[0].is_completed) {
+        // Update the databse
+        const update = await db.query("UPDATE study SET is_completed = true, completed = $1, week_completed = $2 WHERE id = $3 RETURNING *", [currDate, weekNum, req.params.id])
+        res.send(update.rows[0])
+    } else {
+        res.send("ToDo has already been marked as completed")
+    }
 })
 
 // Duplicate the current todo
@@ -94,6 +118,23 @@ app.post("/study/duplicate/:id", async (req, res) => {
     const currentToDo = result.rows[0]
     const newToDo = await db.query("INSERT INTO study (subject, study_type, task) VALUES ($1, $2, $3) RETURNING *", [currentToDo.subject, currentToDo.study_type, currentToDo.task])
     res.send(newToDo.rows[0])
+})
+
+// Delete a ToDo
+app.delete("/study/:id", async (req, res) => {
+    // Check if the task has already been completed
+    const getToDo = await db.query("SELECT is_completed FROM study WHERE id = $1", [req.params.id])
+    console.log(getToDo.rows)
+    try {
+        if (getToDo.rows[0].is_completed == false) {
+            const deleteToDo = await db.query("DELETE FROM study WHERE id = $1 RETURNING *", [req.params.id])
+            res.send(deleteToDo.rows[0])
+        } else {
+            res.send("Cannot delete a ToDo which has already been completed")
+        }
+    } catch(err) {
+        res.send("There are no ToDos which match that ID")
+    }
 })
 
 app.listen(port, () => {
