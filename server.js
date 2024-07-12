@@ -34,10 +34,17 @@ app.get("/study", async (req, res) => {
     // Add in Date Filtering
     console.log(req.query)
     const {start_date, end_date} = req.query
-    const result = await db.query("SELECT week_completed, SUM(study_unit) study_completed FROM study WHERE completed BETWEEN $1 AND $2 GROUP BY week_completed ORDER BY week_completed",
-    [start_date, end_date])  
-    console.log(result.rows)
-    res.json(result.rows)
+    if (start_date && end_date) {
+        const result = await db.query("SELECT week_completed, SUM(study_unit) study_completed FROM study WHERE completed BETWEEN $1 AND $2 GROUP BY week_completed ORDER BY week_completed",
+        [start_date, end_date])  
+        console.log(result.rows)
+        res.json(result.rows)
+    } else {
+        const result = await db.query("SELECT * FROM study ORDER BY id") 
+        console.log(result.rows)
+        res.json(result.rows)
+    }
+
 }) 
 
 app.get("/study/subject", async (req, res) => {
@@ -85,12 +92,16 @@ app.post("/study", async(req, res) => {
 app.patch("/study/:id", async(req, res) => {
     const {subject, study_type, task} = req.body
     // Check if the task has already been completed
+    console.log(req.params.id)
     const getToDo = await db.query("SELECT is_completed FROM study WHERE id = $1", [req.params.id])
-    if (getToDo.rows[0].is_completed) {
+    console.log(getToDo.rows)
+    if (!getToDo.rows[0].is_completed) {
         // Update the database
         const update = await db.query("UPDATE study SET subject = $1, study_type = $2, task = $3 WHERE id = $4 RETURNING *", [subject, study_type, task, req.params.id])
         res.send(update.rows[0])
     } else {
+        console.log("ToDo has already been marked as completed")
+        // const newToDos = await db.query("SELECT * FROM study ORDER BY id")
         res.send("ToDo has already been marked as completed")
     }
 })
@@ -130,9 +141,11 @@ app.delete("/study/:id", async (req, res) => {
             const deleteToDo = await db.query("DELETE FROM study WHERE id = $1 RETURNING *", [req.params.id])
             res.send(deleteToDo.rows[0])
         } else {
+            console.log("Already completed")
             res.send("Cannot delete a ToDo which has already been completed")
         }
     } catch(err) {
+        console.log("No matching ID")
         res.send("There are no ToDos which match that ID")
     }
 })
