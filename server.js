@@ -34,17 +34,10 @@ app.get("/study", async (req, res) => {
     // Add in Date Filtering
     console.log(req.query)
     const {start_date, end_date} = req.query
-    if (start_date && end_date) {
-        const result = await db.query("SELECT week_completed, SUM(study_unit) study_completed FROM study WHERE completed BETWEEN $1 AND $2 GROUP BY week_completed ORDER BY week_completed",
-        [start_date, end_date])  
-        console.log(result.rows)
-        res.json(result.rows)
-    } else {
-        const result = await db.query("SELECT * FROM study ORDER BY id") 
-        console.log(result.rows)
-        res.json(result.rows)
-    }
-
+    const result = await db.query("SELECT week_completed, SUM(study_unit) study_completed FROM study WHERE completed BETWEEN $1 AND $2 GROUP BY week_completed ORDER BY week_completed",
+    [start_date, end_date])  
+    console.log(result.rows)
+    res.json(result.rows)
 }) 
 
 app.get("/study/subject", async (req, res) => {
@@ -78,6 +71,17 @@ app.get("/study/type", async (req, res) => {
         )  
     }
     console.log(result.rows)
+    res.send(result.rows)
+})
+
+// Find all the ToDos which have been completed
+app.get("/study/completed", async (req, res) => {
+    const result = await db.query("SELECT * FROM study WHERE is_completed = ($1) ORDER BY completed LIMIT 6", [true])
+    res.send(result.rows)
+})
+
+app.get("/study/outstanding", async (req, res) => {
+    const result = await db.query("SELECT * FROM study WHERE is_completed = ($1)", [false])
     res.send(result.rows)
 })
 
