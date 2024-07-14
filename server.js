@@ -76,7 +76,7 @@ app.get("/study/type", async (req, res) => {
 
 // Find all the ToDos which have been completed
 app.get("/study/completed", async (req, res) => {
-    const result = await db.query("SELECT * FROM study WHERE is_completed = ($1) ORDER BY completed LIMIT 6", [true])
+    const result = await db.query("SELECT * FROM study WHERE is_completed = ($1) ORDER BY completed DESC LIMIT 6", [true])
     res.send(result.rows)
 })
 
@@ -118,7 +118,7 @@ app.patch("/study/completed/:id", async (req, res) => {
     const weekNum = moment(currDate, "DD/MM/YYYY").week()
     // Check if the task has already been completed
     const getToDo = await db.query("SELECT is_completed FROM study WHERE id = $1", [req.params.id])
-    if (getToDo.rows[0].is_completed) {
+    if (!getToDo.rows[0].is_completed) {
         // Update the databse
         const update = await db.query("UPDATE study SET is_completed = true, completed = $1, week_completed = $2 WHERE id = $3 RETURNING *", [currDate, weekNum, req.params.id])
         res.send(update.rows[0])
